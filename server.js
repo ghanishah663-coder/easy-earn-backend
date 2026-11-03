@@ -30,7 +30,7 @@ const jwt = require('jsonwebtoken');
 
 const { prepare, transaction } = require(/db');
 const { pktDate, prevPktDate, getConfig, publicConfig, coinsToPkr, getBalance, credit, notify, fraud, makeReferralCode, publicUser, validEmail, getMaskedPayoutSource } = require('./utils');
-const { auth, adminOnly } = require('./src/middleware');
+const { auth, adminOnly } = require('.middleware');
 
 if (!process.env.JWT_SECRET) console.warn('[warn] JWT_SECRET is not set — using a dev fallback. Set JWT_SECRET before production use.');
 if (!process.env.ADMOB_SSV_KEY) console.warn('[warn] ADMOB_SSV_KEY is not set — ad rewards run in audit-logged capped mode only. Set it before production AdMob use.');
@@ -50,7 +50,7 @@ const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHead
 const signToken = (u) => jwt.sign({ id: u.id, role: u.role }, process.env.JWT_SECRET || 'dev-only-change-me', { expiresIn: '7d' });
 const bad = (res, code, msg, status = 400) => res.status(status).json({ error: code, message: msg });
 
-app.get('/api/health', (req, res) => res.json({ app: 'EASY EARN', status: 'ok', currency: 'PKR', driver: require('./src/db').driver }));
+app.get('/api/health', (req, res) => res.json({ app: 'EASY EARN', status: 'ok', currency: 'PKR', driver: require('.//db').driver }));
 app.get('/', (req, res) => res.json({ app: 'EASY EARN', status: 'ok', note: 'Earnings are not guaranteed and depend on real partner availability. Withdrawals are paid only after a confirmed external payout.' }));
 app.get('/api/config/public', (req, res) => res.json(publicConfig()));
 
