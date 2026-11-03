@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EASY EARN — Make Money Online</title>
+<meta name="description" content="EASY EARN — earn coins through daily check-ins, spin wheel, games, tasks and referrals. Withdrawals via JazzCash, Easypaisa and bank, only after admin-confirmed payout.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="logo">EASY <span>EARN</span></div>
+  <div class="tag">Black · White · Gold · PKR · Real backend ledger, no fake balances</div>
+  <div class="spacer"></div>
+  <span id="userBadge" class="muted"></span>
+  <button id="logoutBtn" class="secondary hidden" type="button">Logout</button>
+</header>
+<main>
+  <div id="globalError" class="hidden"></div>
+  <div id="globalOk" class="hidden"></div>
+
+  <!-- AUTH -->
+  <section id="authView">
+    <div class="card">
+      <h1>Welcome to EASY EARN</h1>
+      <p class="muted">Earn coins with daily check-ins, a server-side spin wheel, games, tasks and referrals. Coins convert to PKR at the rate set by the admin. There is <strong>no joining fee</strong> and <strong>no guaranteed income</strong> — earnings depend on real availability, and a withdrawal is paid only after an admin confirms a real external payout.</p>
+    </div>
+    <div class="card">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <label for="loginEmail">Email</label><input id="loginEmail" type="email" required autocomplete="username">
+        <label for="loginPassword">Password</label><input id="loginPassword" type="password" required autocomplete="current-password">
+        <p><button type="submit">Login</button></p>
+      </form>
+      <div id="loginError" class="hidden"></div>
+    </div>
+    <div class="card">
+      <h2>Create account</h2>
+      <form id="registerForm">
+        <label for="regName">Full name</label><input id="regName" required>
+        <label for="regEmail">Email</label><input id="regEmail" type="email" required autocomplete="username">
+        <label for="regPassword">Password (at least 8 characters)</label><input id="regPassword" type="password" required autocomplete="new-password">
+        <label for="regReferral">Referral code (optional)</label><input id="regReferral" placeholder="e.g. EASYXXXXXX">
+        <p><button type="submit">Sign up — free</button></p>
+      </form>
+      <div id="registerError" class="hidden"></div>
+      <p class="muted">By signing up you agree to the <a href="#privacy" data-tab-link="privacy">Privacy Policy</a> and <a href="#terms" data-tab-link="terms">Terms</a> below.</p>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section id="appView" class="hidden">
+    <nav class="tabs" aria-label="EASY EARN sections">
+      <button type="button" data-tab="dashboard" class="active">Dashboard</button>
+      <button type="button" data-tab="earn">Earn</button>
+      <button type="button" data-tab="games">Games</button>
+      <button type="button" data-tab="tasks">Tasks</button>
+      <button type="button" data-tab="referrals">Referrals</button>
+      <button type="button" data-tab="wallet">Wallet &amp; History</button>
+      <button type="button" data-tab="withdraw">Withdraw</button>
+      <button type="button" data-tab="notifications">Notifications</button>
+      <button type="button" data-tab="support">Support</button>
+      <button type="button" data-tab="privacy">Privacy</button>
+      <button type="button" data-tab="terms">Terms</button>
+    </nav>
+
+    <section id="tab-dashboard" class="tabpane">
+      <div class="card">
+        <div class="grid">
+          <div class="stat"><b id="wAvailable">—</b><span>Available coins</span></div>
+          <div class="stat"><b id="wPkr">—</b><span>Available (PKR)</span></div>
+          <div class="stat"><b id="wPending">—</b><span>Pending coins</span></div>
+          <div class="stat"><b id="wEarned">—</b><span>Total earned (coins)</span></div>
+          <div class="stat"><b id="cfgRate">—</b><span>Coins per PKR 1</span></div>
+          <div class="stat"><b id="cfgMin">—</b><span>Minimum withdrawal (PKR)</span></div>
+        </div>
+        <p id="dashUser" class="muted"></p>
+        <h3>Daily check-in</h3>
+        <p><button id="checkinBtn" type="button">Claim daily check-in</button> <span id="checkinResult" class="muted"></span></p>
+        <h3>Spin Wheel (server-side prize)</h3>
+        <div class="wheel" id="wheel">SPIN</div>
+        <p><button id="spinBtn" type="button">Spin now</button> <span id="spinResult" class="muted"></span></p>
+        <p class="muted">The prize is chosen by the server, never by this page. Free spins per day and odds are set in the admin reward configuration.</p>
+        <p><a href="admin/">Open Admin Dashboard</a> <span class="muted">(admin accounts only)</span></p>
+      </div>
+    </section>
+
+    <section id="tab-earn" class="tabpane hidden">
+      <div class="card">
+        <h2>Earn</h2>
+        <div id="earnError" class="hidden"></div>
+        <h3>Rewarded ad reward</h3>
+        <p class="notice">Development mode only: this website does not yet run a real AdMob rewarded ad. Real AdMob SSV verification is <strong>not implemented</strong>, so do not treat this button as a verified ad view. When SSV is implemented, this will be replaced by a real rewarded-ad flow.</p>
+        <p><button id="adBtn" type="button">Claim ad reward (dev mode)</button> <span id="adResult" class="muted"></span></p>
+        <p class="muted">The amount is fixed server-side and capped per day, and the same ad event can never be credited twice.</p>
+        <h3>Daily check-in</h3>
+        <p>Use the Dashboard check-in button. One check-in per PKT day, with a streak counter.</p>
+      </div>
+    </section>
+
+    <section id="tab-games" class="tabpane hidden">
+      <div class="card">
+        <h2>Tap Challenge</h2>
+        <p class="muted">Tap as fast as you can for 10 seconds. Coins = taps ÷ 10, up to the daily game cap. Scores above 20 taps/second are rejected by the server as implausible.</p>
+        <div class="tapbox" id="tapBox">Tap to start, then tap fast!</div>
+        <p><span id="tapResult" class="muted"></span></p>
+        <h2>Memory Match</h2>
+        <p class="muted">Match all 8 pairs. Score = 100 per matched pair (800 for a full game). Coins = score ÷ 20, up to the daily game cap.</p>
+        <div class="memory" id="memoryBoard"></div>
+        <p><button id="memoryStart" type="button">Start Memory Match</button> <span id="memoryResult" class="muted"></span></p>
+      </div>
+    </section>
+
+    <section id="tab-tasks" class="tabpane hidden">
+      <div class="card">
+        <h2>Tasks &amp; offerwall</h2>
+        <div id="tasksError" class="hidden"></div>
+        <div id="tasksList"></div>
+        <p class="notice">Offerwall/survey tasks are credited <strong>only</strong> by a signed partner postback to the server. This page can never credit an offerwall task by itself, and no partner is connected by default.</p>
+      </div>
+    </section>
+
+    <section id="tab-referrals" class="tabpane hidden">
+      <div class="card">
+        <h2>Referrals</h2>
+        <p>Your referral code: <b id="refCode">—</b> <button id="copyRef" class="secondary" type="button">Copy code</button></p>
+        <p class="muted" id="refSummary"></p>
+        <p class="muted">Your referrer is credited once, only when a referred user completes their first daily check-in. That credit is recorded in the ledger with a unique reference.</p>
+        <div id="refList"></div>
+      </div>
+    </section>
+
+    <section id="tab-wallet" class="tabpane hidden">
+      <div class="card">
+        <h2>Wallet &amp; transaction history</h2>
+        <div id="txError" class="hidden"></div>
+        <p><button id="refreshTx" class="secondary" type="button">Refresh</button></p>
+        <div class="tablewrap"><table><thead><tr><th>ID</th><th>Type</th><th>Coins</th><th>PKR</th><th>Status</th><th>Reference</th></tr></thead><tbody id="txBody"></tbody></table></div>
+        <h3>Your withdrawals</h3>
+        <div class="tablewrap"><table><thead><tr><th>ID</th><th>Method</th><th>Account</th><th>PKR</th><th>Status</th></tr></thead><tbody id="wdBody"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="tab-withdraw" class="tabpane hidden">
+      <div class="card">
+        <h2>Request withdrawal</h2>
+        <div class="notice"><strong>Pending is not paid.</strong> Requesting a withdrawal only locks your coins. It becomes <em>Paid</em> only after an admin confirms a real JazzCash, Easypaisa or bank payout they made themselves, with a payout reference. Never share a password or OTP here.</div>
+        <div id="wdError" class="hidden"></div>
+        <form id="wdForm">
+          <label for="wdMethod">Method</label>
+          <select id="wdMethod"><option>JazzCash</option><option>Easypaisa</option><option value="bank">Bank transfer</option></select>
+          <label for="wdAccount">Your account number / mobile number</label><input id="wdAccount" required minlength="6" placeholder="Your own verified account">
+          <label for="wdName">Account holder name</label><input id="wdName" required>
+          <label for="wdAmount">Amount (PKR, whole PKR only)</label><input id="wdAmount" type="number" min="1" step="1" required>
+          <p><button type="submit">Request withdrawal</button></p>
+        </form>
+        <div id="wdResult" class="hidden"></div>
+      </div>
+    </section>
+
+    <section id="tab-notifications" class="tabpane hidden">
+      <div class="card">
+        <h2>Notifications</h2>
+        <p><button id="refreshNotif" class="secondary" type="button">Refresh</button></p>
+        <div id="notifList"></div>
+      </div>
+    </section>
+
+    <section id="tab-support" class="tabpane hidden">
+      <div class="card">
+        <h2>Support</h2>
+        <form id="supportForm">
+          <label for="supSubject">Subject</label><input id="supSubject" required>
+          <label for="supMessage">Message</label><textarea id="supMessage" required rows="4"></textarea>
+          <p><button type="submit">Send ticket</button></p>
+        </form>
+        <div id="supportError" class="hidden"></div>
+        <h3>Your tickets</h3>
+        <div id="ticketList"></div>
+        <div id="ticketDetail"></div>
+      </div>
+    </section>
+
+    <section id="tab-privacy" class="tabpane hidden">
+      <div class="card">
+        <h2>EASY EARN — Privacy Policy</h2>
+        <p>EASY EARN collects only what it needs to run your account: your name, email, password (stored as a hash, never in plain text), referral information, device/IP fraud signals, and your earning and withdrawal ledger. Your wallet balance is derived from that ledger, never stored as a single editable number.</p>
+        <p>We do not sell your data. Withdrawal account details you enter are used only to process your own withdrawal request and for admin verification of that request. Admin payout-source details, where configured, are never shown to regular users and never shown in full to anyone.</p>
+        <p>There is no joining fee and no guaranteed income. Support contact details must be replaced with real operator details before a public launch — the placeholder contact in the full policy document is not a real support address.</p>
+        <p>Full text: see <code>docs/PRIVACY_POLICY.md</code> in the source package.</p>
+      </div>
+    </section>
+
+    <section id="tab-terms" class="tabpane hidden">
+      <div class="card">
+        <h2>EASY EARN — Terms of Use</h2>
+        <p>By using EASY EARN you agree that: (1) you will use one genuine account and will not create fake accounts, self-refer, or submit false scores; flagged accounts may be reviewed, flagged or banned by an admin; (2) earnings are variable, depend on real partner availability, and are never guaranteed; (3) a withdrawal request is not a payment — it is paid only after an admin confirms a real external payout with a payout reference, and rejected requests refund locked coins; (4) offerwall and ad rewards depend on partner verification (signed postbacks / AdMob SSV) and are not credited on unverified claims.</p>
+        <p>Full text: see <code>docs/TERMS.md</code> in the source package. Operator and contact details in those documents must be replaced with real details and reviewed before a public launch.</p>
+      </div>
+    </section>
+  </section>
+</main>
+<footer>EASY EARN · Black, white and gold · No joining fee · No guaranteed earnings · Withdrawals are paid only after a real, recorded payout. · <a href="#privacy" data-tab-link="privacy">Privacy</a> · <a href="#terms" data-tab-link="terms">Terms</a> · <a href="admin/">Admin</a></footer>
+<script src="app.js"></script>
+</body>
+</html>
