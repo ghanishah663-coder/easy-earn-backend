@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "description": "SHAH EARN backend \u2014 real SQLite ledger, JWT auth, tasks, check-ins, spins, games, referrals, withdrawals (pending until a real external payout is confirmed by an admin). No fake balances, no guaranteed earnings, no fake payment confirmations.",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "server.js",
+  "name": "shah-earn-backend",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "type": "commonjs",
+  "version": "1.0.0"
+}
