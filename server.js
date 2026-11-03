@@ -28,8 +28,8 @@ const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const { prepare, transaction } = require('./src/db');
-const { pktDate, prevPktDate, getConfig, publicConfig, coinsToPkr, getBalance, credit, notify, fraud, makeReferralCode, publicUser, validEmail, getMaskedPayoutSource } = require('./src/utils');
+const { prepare, transaction } = require(/db');
+const { pktDate, prevPktDate, getConfig, publicConfig, coinsToPkr, getBalance, credit, notify, fraud, makeReferralCode, publicUser, validEmail, getMaskedPayoutSource } = require('./utils');
 const { auth, adminOnly } = require('./src/middleware');
 
 if (!process.env.JWT_SECRET) console.warn('[warn] JWT_SECRET is not set — using a dev fallback. Set JWT_SECRET before production use.');
