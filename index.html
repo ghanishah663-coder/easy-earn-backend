@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EASY EARN — Admin Panel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="logo">EASY <span>EARN</span> — Admin</div>
+  <div class="tag">Black · White · Golden · PKR · Real API only, no demo data</div>
+  <div class="spacer"></div>
+  <span id="adminEmail" class="muted"></span>
+  <button id="logoutBtn" class="secondary" type="button">Logout</button>
+</header>
+<main>
+  <div class="card">
+    <label for="baseUrl">Backend base URL (leave empty = same origin, e.g. the server hosting this page)</label>
+    <input id="baseUrl" type="text" placeholder="e.g. https://api.example.com — empty means same origin">
+    <p class="muted">The token is stored in <code>sessionStorage</code> only and is sent as <code>Authorization: Bearer &lt;token&gt;</code>. If an endpoint returns 404 or another error, the panel shows that error plainly instead of inventing data.</p>
+  </div>
+  <div id="globalError" class="hidden"></div>
+
+  <!-- LOGIN -->
+  <section id="loginView" class="card">
+    <h1>Admin login</h1>
+    <p class="muted">Log in with an admin account. This panel checks <code>user.role == admin</code> on login, and verifies admin access when the server does not return a role. Non-admin accounts are refused here even if login itself succeeds.</p>
+    <form id="loginForm">
+      <label for="loginEmail">Email</label>
+      <input id="loginEmail" type="email" required autocomplete="username">
+      <label for="loginPassword">Password</label>
+      <input id="loginPassword" type="password" required autocomplete="current-password">
+      <p><button type="submit">Log in as admin</button></p>
+    </form>
+    <div id="loginError" class="hidden"></div>
+    <p class="muted">First login? The backend seeds <code>admin@shahearn.local</code> with a default password printed in its startup log — change it immediately after first sign-in. Note: the shipped backend has no password-change endpoint, so see <code>docs/DEPLOYMENT.md</code> §11 for how to rotate it. Never share the admin token.</p>
+  </section>
+
+  <!-- APP -->
+  <section id="appView" class="hidden">
+    <nav class="tabs" aria-label="Admin sections">
+      <button type="button" data-tab="dashboard" class="active">Dashboard</button>
+      <button type="button" data-tab="users">Users</button>
+      <button type="button" data-tab="tasks">Tasks</button>
+      <button type="button" data-tab="rewards">Rewards config</button>
+      <button type="button" data-tab="withdrawals">Withdrawals</button>
+      <button type="button" data-tab="transactions">Transactions</button>
+      <button type="button" data-tab="ads">Ads</button>
+      <button type="button" data-tab="fraud">Fraud</button>
+      <button type="button" data-tab="support">Support</button>
+    </nav>
+
+    <section id="tab-dashboard" class="tabpane">
+      <div class="card">
+        <div class="row" style="align-items:center"><h2>Dashboard</h2><button id="refreshStats" class="secondary" type="button">Refresh</button></div>
+        <div id="statsError" class="hidden"></div>
+        <div class="grid">
+          <div class="stat"><b id="statUsers">—</b><span>Users</span></div>
+          <div class="stat"><b id="statEarned">—</b><span>Total earned (coins)</span></div>
+          <div class="stat"><b id="statPending">—</b><span>Pending withdrawals (PKR)</span></div>
+          <div class="stat"><b id="statPaid">—</b><span>Paid withdrawals (PKR)</span></div>
+          <div class="stat"><b id="statRevenue">—</b><span>Revenue (PKR)</span></div>
+          <div class="stat"><b id="statExpenses">—</b><span>Expenses (PKR)</span></div>
+        </div>
+        <p id="statNote" class="muted"></p>
+        <p class="muted">Source: <code>GET /api/admin/stats</code>. Missing fields are shown as 0, never estimated.</p>
+      </div>
+    </section>
+
+    <section id="tab-users" class="tabpane hidden">
+      <div class="card">
+        <div class="row" style="align-items:center"><h2>Users</h2><button id="refreshUsers" class="secondary" type="button">Refresh</button></div>
+        <div id="usersError" class="hidden"></div>
+        <div class="tablewrap"><table><thead><tr><th>ID</th><th>User</th><th>Coins</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersBody"></tbody></table></div>
+        <p class="muted">Source: <code>GET /api/admin/users</code> · Flag: <code>POST /api/admin/users/:id/flag</code> · Ban: <code>POST /api/admin/users/:id/ban</code>. Banning blocks the account server-side; this panel cannot undo a ban unless the backend provides an unban endpoint.</p>
+      </div>
+    </section>
+
+    <section id="tab-tasks" class="tabpane hidden">
+      <div class="card">
+        <div class="row" style="align-items:center"><h2>Tasks</h2><button id="refreshTasks" class="secondary" type="button">Refresh</button></div>
+        <div id="tasksError" class="hidden"></div>
+        <div class="tablewrap"><table><thead><tr><th>ID</th><th>Task</th><th>Type</th><th>Reward (coins)</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tasksBody"></tbody></table></div>
+        <h3>Add task</h3>
+        <form id="taskForm">
+          <div class="row">
+            <div><label for="taskTitle">Title *</label><input id="taskTitle" required></div>
+            <div><label for="taskType">Type</label><input id="taskType" placeholder="task / survey / offerwall"></div>
+            <div><label for="taskReward">Reward (coins)</label><input id="taskReward" type="number" min="0" step="1" value="10"></div>
+          </div>
+          <label for="taskUrl">Partner URL (optional, for external offers)</label><input id="taskUrl" type="url" placeholder="https://…">
+          <p><button type="submit">Create task</button></p>
+        </form>
+        <p class="muted">List: <code>GET /api/admin/tasks</code> (falls back to <code>GET /api/tasks</code> — the backend has no admin task-list route, so the fallback is the normal path) · Create: <code>POST /api/admin/tasks</code> (type must be <code>survey</code>, <code>task</code> or <code>offerwall</code>) · Update: <code>PUT /api/admin/tasks/:id</code> · Delete: <code>DELETE /api/admin/tasks/:id</code> (backend soft-removes: sets <code>active = 0</code>, keeping user-task history).</p>
+      </div>
+    </section>
+
+    <section id="tab-rewards" class="tabpane hidden">
+      <div class="card">
+        <div class="row" style="align-items:center"><h2>Reward configuration</h2><button id="refreshRewards" class="secondary" type="button">Refresh</button></div>
+        <div id="rewardsError" class="hidden"></div>
+        <form id="rewardsForm">
+          <div class="row">
+            <div><label for="cfgCoinRate">Coins per PKR 1 (coin_to_pkr_rate)</label><input id="cfgCoinRate" type="number" min="0" step="any"></div>
+            <div><label for="cfgMinWithdrawal">Minimum withdrawal (PKR)</label><input id="cfgMinWithdrawal" type="number" min="0" step="any"></div>
+            <div><label for="cfgCheckin">Daily check-in (coins)</label><input id="cfgCheckin" type="number" min="0" step="1"></div>
+            <div><label for="cfgAdReward">Rewarded ad reward (coins)</label><input id="cfgAdReward" type="number" min="0" step="1"></div>
+            <div><label for="cfgAdCap">Ad daily cap (coins)</label><input id="cfgAdCap" type="number" min="0" step="1"></div>
+            <div><label for="cfgGameCap">Game daily cap (coins)</label><input id="cfgGameCap" type="number" min="0" step="1"></div>
+            <div><label for="cfgReferral">Referral reward (coins)</label><input id="cfgReferral" type="number" min="0" step="1"></div>
+            <div><label for="cfgSpinFree">Free spins per day</label><input id="cfgSpinFree" type="number" min="0" step="1"></div>
+          </div>
+          <label for="cfgSpinWeights">Spin weights (JSON array of {label, coins, weight} — server-side odds)</label>
+          <textarea id="cfgSpinWeights" placeholder='[{"label":"10 coins","coins":10,"weight":5}]'></textarea>
+          <p><button type="submit">Save config</button></p>
+        </form>
+        <p class="muted">Read: <code>GET /api/config/public</code> · Save: <code>POST /api/admin/config</code>. Only the keys above are accepted by the backend — any other key is rejected. Empty fields are left unchanged.</p>
+        <h3>Raw config returned by the server</h3>
+        <pre id="rewardsRaw" style="white-space:pre-wrap;word-break:break-word;background:#0f0f11;border:1px solid #2a2a30;border-radius:10px;padding:12px"></pre>
+      </div>
+    </section>
+
+    <section id="tab-withdrawals" class="tabpane hidden">
+      <div class="card">
+        <div class="row" style="align-items:center"><h2>Withdrawals</h2><button id="refreshWithdrawals" class="secondary" type="button">Refresh</button></div>
+        <div class="notice">Important: <strong>Approve ≠ paid.</strong> Approve only moves a request forward. Use <strong>Mark paid only after a real payout</strong> through JazzCash, Easypaisa or bank transfer, and enter the real payout reference — it is required. A withdrawal must never be marked paid without one. Rejection refunds coins server-side; this panel does not create a refund itself.</div>
+        <div id="withdrawalsError" class="hidden"></div>
+        <div class="tablewrap"><table><thead><tr><th>ID</th><th>User</th><th>Method / account</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="withdrawalsBody"></tbody></table></div>
+        <p class="muted">Source: <code>GET /api/admin/withdrawals</code> · <code>POST /api/admin/withdrawals/:id/approve</code> · <code>POST /api/admin/withdrawals/:id/mark-paid</code> (body: <code>{payout_reference}</code>) · <code>POST /api/admin/withdrawals/:id/reject</code> (body: <code>{reason}</code>). Until a payment provider is integrated, withdrawals stay pending — see <code>docs/DEPLOYMENT.md</code> and <code>docs/INTEGRATIONS.md</code>.</p>
+      </div>
+    </section>
+
+    <section id="tab-transactions" class="tabpane hidden">
+      <div class="card">
+        <div class="row" style="align-items:center"><h2>Transactions</h2><button id="refreshTransactions" class="secondary" type="button">Refresh</button></div>
+        <div id="transactionsError" class="hidden"></div>
+        <div class="tablewrap"><table><thead><tr><th>ID</th><th>User</th><th>Type</th><th>Coins</th><th>PKR</th><th>Status</th></tr></thead><tbody id="transactionsBody"></tbody></table></div>
+        <pre id="transactionsRaw" style="white-space:pre-wrap;word-break:break-word;background:#0f0f11;border:1px solid #2a2a30;border-radius:10px;padding:12px"></pre>
+        <p class="muted">Source: <code>GET /api/admin/transactions</code>. Every coin/PKR movement shown here must come from a server-verified event (ad completion, task completion, check-in, spin, referral, withdrawal), never from a client-side edit.</p>
+      </div>
+    </section>
+
+    <section id="tab-ads" class="tabpane hidden">
+      <div class="card">
+        <div class="row" style="align-items:center"><h2>Advertisements</h2><button id="refreshAds" class="secondary" type="button">Refresh</button></div>
+        <div id="adsError" class="hidden"></div>
+        <pre id="adsConfig" style="white-space:pre-wrap;word-break:break-word;background:#0f0f11;border:1px solid #2a2a30;border-radius:10px;padding:12px"></pre>
+        <div class="tablewrap"><table><thead><tr><th>ID</th><th>User</th><th>Network / event</th><th>Coins</th><th>Date</th></tr></thead><tbody id="adsBody"></tbody></table></div>
+        <p class="muted">Source: <code>GET /api/admin/ads</code> (returns <code>{config, events, total_coins_awarded}</code>) + <code>GET /api/config/public</code> (ad unit IDs). Note the backend's current ad mode: when <code>ADMOB_SSV_KEY</code> is unset, rewards are server-capped, fixed-amount and idempotent — the backend itself warns this is <strong>not</strong> production-safe for real AdMob payouts, so SSV must be set before launch (see <code>docs/INTEGRATIONS.md</code>). This panel has no way to add an ad network; that is a backend/app integration.</p>
+      </div>
+    </section>
+
+    <section id="tab-fraud" class="tabpane hidden">
+      <div class="card">
+        <div class="row" style="align-items:center"><h2>Fraud detection</h2><button id="refreshFraud" class="secondary" type="button">Refresh</button></div>
+        <div id="fraudError" class="hidden"></div>
+        <div class="tablewrap"><table><thead><tr><th>ID</th><th>User</th><th>Reason</th><th>Details</th><th>Status</th></tr></thead><tbody id="fraudBody"></tbody></table></div>
+        <pre id="fraudRaw" style="white-space:pre-wrap;word-break:break-word;background:#0f0f11;border:1px solid #2a2a30;border-radius:10px;padding:12px"></pre>
+        <p class="muted">Source: <code>GET /api/admin/fraud</code>. To act on a flagged account, use the Users tab (flag/ban). Fraud rules themselves (duplicate devices, self-referrals, abnormal earn rates) are enforced server-side; this panel only displays what the backend flags.</p>
+      </div>
+    </section>
+
+    <section id="tab-support" class="tabpane hidden">
+      <div class="card">
+        <div class="row" style="align-items:center"><h2>Support tickets</h2><button id="refreshTickets" class="secondary" type="button">Refresh</button></div>
+        <div id="ticketsError" class="hidden"></div>
+        <div class="tablewrap"><table><thead><tr><th>ID</th><th>User</th><th>Ticket</th><th>Status</th><th>Actions</th></tr></thead><tbody id="ticketsBody"></tbody></table></div>
+        <p class="muted">Source: <code>GET /api/admin/tickets</code> · Reply: <code>POST /api/admin/tickets/:id/reply</code> (body: <code>{message}</code>). Do not ask users for passwords, OTPs or full account numbers in a reply.</p>
+      </div>
+    </section>
+  </section>
+</main>
+<footer>EASY EARN admin panel · No joining fee · No guaranteed earnings · Withdrawals are paid only after a real, recorded payout.</footer>
+<script src="app.js"></script>
+</body>
+</html>
