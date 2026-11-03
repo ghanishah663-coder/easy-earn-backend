@@ -28,7 +28,7 @@ const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const { prepare, transaction } = require(./db');
+const { prepare, transaction } = require('./db');
 const { pktDate, prevPktDate, getConfig, publicConfig, coinsToPkr, getBalance, credit, notify, fraud, makeReferralCode, publicUser, validEmail, getMaskedPayoutSource } = require('./utils');
 const { auth, adminOnly } = require('.middleware');
 
