@@ -179,7 +179,30 @@
         <h3>Your tickets</h3>
         <div id="ticketList"></div>
         <div id="ticketDetail"></div>
-      </div>
+      </div>async function loadPaymentMethods() {
+    try {
+        const res = await fetch('/api/payment-methods');
+        const data = await res.json();
+        if(data.success) {
+            let html = '';
+            data.methods.forEach(m => {
+                html += `<div style="background:#222; padding:10px; margin:8px 0; border-radius:5px; border:1px solid #444;">
+                    <b>${m.name}</b><br>
+                    Account Name: ${m.accountName}<br>
+                    Account Number: <code style="color:#f1c40f;">${m.accountNumber}</code>
+                </div>`;
+            });
+            document.getElementById('payment-methods-list').innerHTML = html;
+        }
+    } catch(e) { 
+        console.error(e);
+        document.getElementById('payment-methods-list').innerHTML = 'Failed to load payment methods.';
+    }
+}
+
+// Jab app load ho ya deposit tab khule, yeh function call ho jaye
+loadPaymentMethods();
+      
     </section>
 
     <section id="tab-privacy" class="tabpane hidden">
