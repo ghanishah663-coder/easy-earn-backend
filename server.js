@@ -54,6 +54,15 @@ const bad = (res, code, msg, status = 400) => res.status(status).json({ error: c
 app.get('/api/health', (req, res) => res.json({ app: 'EASY EARN', status: 'ok', currency: 'PKR', driver: require('.//db').driver }));
 app.get('/', (req, res) => res.json({ app: 'EASY EARN', status: 'ok', note: 'Earnings are not guaranteed and depend on real partner availability. Withdrawals are paid only after a confirmed external payout.' }));
 app.get('/api/config/public', (req, res) => res.json(publicConfig()));
+app.get('/api/payment-methods', (req, res) => {
+    res.json({
+        success: true,
+        methods: [
+            { name: "Easypaisa", accountName: "syed ghani shah buakhri", accountNumber: "03157328771", type: "merchant" },
+            { name: "Meezan Bank", accountName: " syed ghani shah buakhri", accountNumber: "05100113717946", type: "bank" }
+        ]
+    });
+});
 
 // ---------------- Auth ----------------
 app.post('/api/auth/register', authLimiter, (req, res) => {
