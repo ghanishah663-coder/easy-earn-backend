@@ -55,7 +55,8 @@
     if (name === 'referrals') loadReferrals();
     if (name === 'notifications') loadNotifications();
     if (name === 'support') loadTickets();
-  }
+  if (name === 'deposit') loadPaymentMethods();
+     
   document.querySelectorAll('nav.tabs button').forEach(function (b) {
     b.addEventListener('click', function () { showTab(b.getAttribute('data-tab')); });
   });
